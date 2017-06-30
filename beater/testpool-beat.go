@@ -1,8 +1,10 @@
 package beater
 
 import (
+    "bufio"
 	"fmt"
 	"time"
+    "os"
 
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
@@ -12,10 +14,11 @@ import (
 	"github.com/testcraftsman/testpool-beat/config"
 )
 
-type Testpool-beat struct {
+type TestpoolBeat struct {
 	done   chan struct{}
 	config config.Config
 	client publisher.Client
+    lastIndexTime time.Time
 }
 
 // Creates beater
@@ -25,14 +28,35 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, fmt.Errorf("Error reading config file: %v", err)
 	}
 
-	bt := &Testpool-beat{
+	bt := &TestpoolBeat{
 		done: make(chan struct{}),
 		config: config,
 	}
 	return bt, nil
 }
 
-func (bt *Testpool-beat) Run(b *beat.Beat) error {
+func profilRead(profile_path string) error {
+
+  fhndl, err := os.Open(profile_path)
+  if err != nil {
+    return err
+  }
+
+  defer fhndl.Close()
+
+  scanner := bufio.NewScanner(fhndl)
+  for scanner.Scan() {
+    fmt.Println(scanner.Text())
+  }
+   
+  if err := scanner.Err(); err != nil {
+    return err
+  }
+
+  return nil
+}
+
+func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 	logp.Info("testpool-beat is running! Hit CTRL-C to stop it.")
 
 	bt.client = b.Publisher.Connect()
@@ -49,6 +73,7 @@ func (bt *Testpool-beat) Run(b *beat.Beat) error {
 			"@timestamp": common.Time(time.Now()),
 			"type":       b.Name,
 			"counter":    counter,
+            "profile":    "mark",
 		}
 		bt.client.PublishEvent(event)
 		logp.Info("Event sent")
@@ -56,7 +81,7 @@ func (bt *Testpool-beat) Run(b *beat.Beat) error {
 	}
 }
 
-func (bt *Testpool-beat) Stop() {
+func (bt *TestpoolBeat) Stop() {
 	bt.client.Close()
 	close(bt.done)
 }

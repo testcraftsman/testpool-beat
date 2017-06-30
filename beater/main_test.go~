@@ -1,0 +1,9 @@
+package beater
+
+import "testing"
+import "fmt"
+
+func TestProfile(t *testing.T) {
+  fmt.Printf("hello")
+}
+

@@ -7,3 +7,5 @@
       required: true
       description: >
         PLEASE UPDATE DOCUMENTATION
+    - name: profile
+      type: text
