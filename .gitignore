@@ -5,3 +5,4 @@
 /testpool-beat
 /testpool-beat.test
 *.pyc
+*.*~

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
     "os"
+    "encoding/json"
 
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
@@ -35,9 +36,18 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 	return bt, nil
 }
 
+type Message struct {
+    Profile   string
+    Level     string
+    Vm_max    int
+    Vm_count  int
+    Timestamp time.Time `json:"RFC3339Nano, string"`
+}
+
 func profilRead(profile_path string) error {
 
   fhndl, err := os.Open(profile_path)
+
   if err != nil {
     return err
   }
@@ -46,7 +56,11 @@ func profilRead(profile_path string) error {
 
   scanner := bufio.NewScanner(fhndl)
   for scanner.Scan() {
-    fmt.Println(scanner.Text())
+    data := []byte(scanner.Text())
+    var msg Message
+    if err := json.Unmarshal(data, &msg); err == nil {
+        fmt.Println(msg)
+    }
   }
    
   if err := scanner.Err(); err != nil {
