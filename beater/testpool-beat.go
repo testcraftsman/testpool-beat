@@ -37,11 +37,11 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 }
 
 type Message struct {
-    Profile   string
-    Level     string
-    Vm_max    int
-    Vm_count  int
-    Timestamp time.Time `json:"RFC3339Nano, string"`
+    Profile   string    `json: "profle"`
+    Level     string    `json: "level"`
+    Vm_max    int       `json: "vm_max"`
+    Vm_count  int       `json: "vm_count"`
+    Timestamp time.Time `json: "RFC3339Nano"`
 }
 
 func profilRead(profile_path string) error {
@@ -58,7 +58,10 @@ func profilRead(profile_path string) error {
   for scanner.Scan() {
     data := []byte(scanner.Text())
     var msg Message
-    if err := json.Unmarshal(data, &msg); err == nil {
+
+    err := json.Unmarshal(data, &msg)
+
+    if err == nil {
         fmt.Println(msg)
     }
   }

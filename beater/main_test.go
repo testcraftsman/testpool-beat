@@ -1,8 +1,8 @@
 package beater
 
-import "testing"
+import "encoding/json"
 import "fmt"
-import "log"
+import "testing"
 import "time"
 import "github.com/stretchr/testify/assert"
 
@@ -13,7 +13,21 @@ func TestTimeFormat(t *testing.T) {
   t1, err := time.Parse("2006-01-02T15:04:05", str)
   assert.Equal(t, err, nil, "parse time")
   assert.Equal(t, t1.Year(), 2017, "year does not match")
-  assert.Equal(t, int(t1.Month()), 6, "month does not match")
+  assert.Equal(t, int(t1.Month()), 6,
+               "month does not match")
+}
+
+// TestUnmarshal test unmarshal
+func TestUnmarshal(t *testing.T) {
+
+  var msg Message
+  sample := "{\"profile\": \"example\", \"level\": \"info\", \"vm_max\": 3, \"vm_count\": 0, \"timestamp\": 2017-04-15T05:30:58.362953Z06:00}"
+
+  fmt.Printf(string(sample))
+
+  err := json.Unmarshal([]byte(sample), &msg)
+  assert.Equal(t, err, nil, err)
+
 }
 
 // TestProfile implementing reading a profile.
