@@ -58,13 +58,13 @@ func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 		case <-ticker.C:
 		}
 
-	    logp.Info("testpool-beat checking %s\n",
-                  bt.profileLog)
+	    logp.Debug("testpool-beat checking %s\n",
+                   bt.profileLog)
 		timestamp := common.Time(time.Now())
 
         if _, err := os.Stat(bt.profileLog); os.IsNotExist(err) {
-	        logp.Info("testpool-beat %s does not exist\n",
-                      bt.profileLog)
+	        logp.Debug("testpool-beat %s does not exist\n",
+                       bt.profileLog)
             continue
         }
         ////
@@ -98,7 +98,6 @@ func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 				}
 				bt.client.PublishEvent(event)
 			}
-			logp.Info("event sent")
 			counter++
             if err := os.Remove("/var/tmp/profile.log"); err != nil {
 			    logp.Err(err.Error())
