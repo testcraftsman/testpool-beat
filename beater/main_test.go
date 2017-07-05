@@ -45,3 +45,10 @@ func TestProfile(t *testing.T) {
   }
   fmt.Println("MARK: reading done")
 }
+
+func TestConfigRead(t *testing.T) {
+
+  fpath, err := configRead()
+  assert.Equal(t, err, nil, err)
+  assert.Equal(t, fpath, "/var/log/testpool/profile.log", err)
+}

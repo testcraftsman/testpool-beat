@@ -1,11 +1,11 @@
 package beater
 
-import (
-    "bufio"
-    "time"
-    "os"
-    "encoding/json"
-)
+import "io/ioutil"
+import "bufio"
+import "time"
+import "os"
+import "encoding/json"
+import "github.com/smallfish/simpleyaml"
 
 
 type Message struct {
@@ -14,6 +14,25 @@ type Message struct {
     Vm_max    int       `json: "vm_max"`
     Vm_count  int       `json: "vm_count"`
     Timestamp time.Time `json: "RFC3339Nano"`
+}
+
+
+// configRead: Read configuration to find profile log.
+func configRead() (string, error) {
+
+  fhndl, err := ioutil.ReadFile("/etc/testpool/testpool.yml")
+  if err != nil {
+    return "", err
+  }
+
+  root, err := simpleyaml.NewYaml(fhndl)
+  if err != nil {
+    return "", err
+  }
+
+  value := root.GetPath("tpldaemon", "profile", "log")
+  return value.String()
+  
 }
 
 
