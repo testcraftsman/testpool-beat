@@ -38,7 +38,7 @@ func configRead() (string, error) {
 
 // profileRead: Read profile log content.
 // Follows generator pattern by returning a channel.
-func profilRead(profile_path string) (<-chan Message, error) {
+func profileRead(profile_path string) (<-chan Message, error){
 
   fhndl, err := os.Open(profile_path)
   if err != nil {
