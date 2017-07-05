@@ -57,11 +57,13 @@ func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 		case <-ticker.C:
 		}
 
+	    logp.Info("testpool-beat checking %s\n",
+                  bt.profileLog)
 		timestamp := common.Time(time.Now())
 		profiles, err := profileRead(bt.profileLog)
 		if err != nil {
 			logp.Err(fmt.Sprintf("%v", err))
-
+        } else {
 			for item := range profiles {
 
 				event := common.MapStr{
@@ -76,7 +78,7 @@ func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 				}
 				bt.client.PublishEvent(event)
 			}
-			logp.Info("Event sent")
+			logp.Info("event sent")
 			counter++
 		}
 	}
