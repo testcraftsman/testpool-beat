@@ -24,6 +24,7 @@ type TestpoolBeat struct {
 
 // Creates beater
 func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+
 	config := config.DefaultConfig
 	if err := cfg.Unpack(&config); err != nil {
 		return nil, fmt.Errorf("Error reading config file: %v", err)
@@ -44,33 +45,42 @@ type Message struct {
     Timestamp time.Time `json: "RFC3339Nano"`
 }
 
-func profilRead(profile_path string) error {
+
+// profileRead: Read profile log content.
+// Follows generator pattern by returning a channel.
+func profilRead(profile_path string) (<-chan Message, error) {
 
   fhndl, err := os.Open(profile_path)
-
   if err != nil {
-    return err
+    return nil, err
   }
 
-  defer fhndl.Close()
-
+  generator := make (chan Message)
   scanner := bufio.NewScanner(fhndl)
-  for scanner.Scan() {
-    data := []byte(scanner.Text())
-    var msg Message
 
-    err := json.Unmarshal(data, &msg)
+  go func () {
+    // Defer must be in here because entering go routine will
+    // cause defer.
+    defer fhndl.Close()
 
-    if err == nil {
-        fmt.Println(msg)
+    for scanner.Scan() {
+      data := []byte(scanner.Text())
+      var msg Message
+
+      err := json.Unmarshal(data, &msg)
+  
+      if err == nil {
+        generator <- msg
+      }
     }
-  }
+    close(generator)
+  }()
    
   if err := scanner.Err(); err != nil {
-    return err
+    return nil, err
   }
 
-  return nil
+  return generator, nil
 }
 
 func (bt *TestpoolBeat) Run(b *beat.Beat) error {

@@ -33,6 +33,15 @@ func TestUnmarshal(t *testing.T) {
 // TestProfile implementing reading a profile.
 func TestProfile(t *testing.T) {
 
-  err := profilRead("profile.log")
+  generator, err := profilRead("profile.log")
+
   assert.Equal(t, err, nil, "read profile")
+  assert.NotEqual(t, generator, nil, "generator failed")
+
+  fmt.Println("MARK: reading")
+  for item := range generator {
+    fmt.Println("MARK: in")
+    fmt.Println(item)
+  }
+  fmt.Println("MARK: reading done")
 }
