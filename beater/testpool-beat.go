@@ -3,6 +3,7 @@ package beater
 import (
 	"fmt"
 	"time"
+	"os"
 
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
@@ -60,9 +61,28 @@ func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 	    logp.Info("testpool-beat checking %s\n",
                   bt.profileLog)
 		timestamp := common.Time(time.Now())
-		profiles, err := profileRead(bt.profileLog)
+
+        if _, err := os.Stat(bt.profileLog); os.IsNotExist(err) {
+	        logp.Info("testpool-beat %s does not exist\n",
+                      bt.profileLog)
+            continue
+        }
+        ////
+        // TODO: confirm that moving file worked for 
+        // structured log content generated in Python
+        // Its possible for the testpool-daemon to maintain
+        // a handle to the moved file.
+        err := os.Rename(bt.profileLog,
+                         "/var/tmp/profile.log")
 		if err != nil {
-			logp.Err(fmt.Sprintf("%v", err))
+			logp.Err(err.Error())
+            continue
+        }
+        ////
+
+		profiles, err := profileRead("/var/tmp/profile.log")
+		if err != nil {
+			logp.Err(err.Error())
         } else {
 			for item := range profiles {
 
@@ -80,6 +100,9 @@ func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 			}
 			logp.Info("event sent")
 			counter++
+            if err := os.Remove("/var/tmp/profile.log"); err != nil {
+			    logp.Err(err.Error())
+            }
 		}
 	}
 }
