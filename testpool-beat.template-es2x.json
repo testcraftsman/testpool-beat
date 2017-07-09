@@ -44,9 +44,6 @@
             }
           }
         },
-        "counter": {
-          "type": "long"
-        },
         "meta": {
           "properties": {
             "cloud": {
@@ -86,16 +83,20 @@
           }
         },
         "profile": {
-          "index": "analyzed",
-          "norms": {
-            "enabled": false
-          },
+          "ignore_above": 1024,
+          "index": "not_analyzed",
           "type": "string"
         },
         "tags": {
           "ignore_above": 1024,
           "index": "not_analyzed",
           "type": "string"
+        },
+        "vm_count": {
+          "type": "long"
+        },
+        "vm_max": {
+          "type": "long"
         }
       }
     }
