@@ -2,10 +2,17 @@
   title: testpool-beat
   description:
   fields:
-    - name: counter
+    - name: vm_count
       type: long
       required: true
       description: >
-        PLEASE UPDATE DOCUMENTATION
+        The number of available VMs
+    - name: vm_max
+      type: long
+      required: true
+      description: >
+        The number of maximum possible VMs.
     - name: profile
-      type: text
+      required: true
+      description: >
+        Name of the profile

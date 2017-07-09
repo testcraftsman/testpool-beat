@@ -112,7 +112,6 @@ func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 		        "@timestamp": timestamp,
 			"type":       b.Name,
 			"profile":    item.Profile,
-			"level":      item.Level,
 			"vm_max":     item.Vm_max,
 			"vm_count":   item.Vm_count,
 			"timestamp":  item.Timestamp,

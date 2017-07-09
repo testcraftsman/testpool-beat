@@ -1,6 +1,6 @@
 /.idea
 /build
-logs/
+/logs
 .DS_Store
 /testpool-beat
 /testpool-beat.test

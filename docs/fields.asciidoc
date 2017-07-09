@@ -128,17 +128,30 @@ None
 
 
 [float]
-=== counter
+=== vm_count
 
 type: long
 
 required: True
 
-PLEASE UPDATE DOCUMENTATION
+The number of available VMs
+
+
+[float]
+=== vm_max
+
+type: long
+
+required: True
+
+The number of maximum possible VMs.
 
 
 [float]
 === profile
 
-type: text
+required: True
+
+Name of the profile
+
 
