@@ -1,7 +1,6 @@
 package beater
 
 import "encoding/json"
-import "fmt"
 import "testing"
 import "time"
 import "github.com/stretchr/testify/assert"
@@ -21,9 +20,7 @@ func TestTimeFormat(t *testing.T) {
 func TestUnmarshal(t *testing.T) {
 
 	var msg Message
-	sample := "{\"profile\": \"example\", \"level\": \"info\", \"vm_max\": 3, \"vm_count\": 0, \"timestamp\": 2017-04-15T05:30:58.362953Z06:00}"
-
-	fmt.Printf(string(sample))
+	sample := "{\"profile\": \"example\", \"level\": \"info\", \"vm_max\": 3, \"vm_count\": 0, \"timestamp\": \"2017-04-15T05:30:58.362953Z\"}"
 
 	err := json.Unmarshal([]byte(sample), &msg)
 	assert.Equal(t, err, nil, err)
@@ -38,12 +35,12 @@ func TestProfile(t *testing.T) {
 	assert.Equal(t, err, nil, "read profile")
 	assert.NotEqual(t, generator, nil, "generator failed")
 
-	fmt.Println("MARK: reading")
+        var counter = 0 
 	for item := range generator {
-		fmt.Println("MARK: in")
-		fmt.Println(item)
+                assert.NotEqual(t, item, nil, item)
+                counter++
 	}
-	fmt.Println("MARK: reading done")
+        assert.NotEqual(t, 0, 1)
 }
 
 func TestConfigRead(t *testing.T) {
