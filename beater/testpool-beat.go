@@ -1,11 +1,10 @@
 package beater
 
-
 import (
 	"fmt"
-	"time"
-	"os"
 	"io"
+	"os"
+	"time"
 
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
@@ -76,50 +75,50 @@ func (bt *TestpoolBeat) Run(b *beat.Beat) error {
 	bt.client = b.Publisher.Connect()
 	ticker := time.NewTicker(bt.config.Period)
 	for {
-            select {
-	    case <-bt.done:
-	        return nil
-            case <-ticker.C:
-	    }
+		select {
+		case <-bt.done:
+			return nil
+		case <-ticker.C:
+		}
 
-	    timestamp := common.Time(time.Now())
+		timestamp := common.Time(time.Now())
 
-            if _, err := os.Stat(bt.profileLog); os.IsNotExist(err) {
-	        logp.Debug(service, "log does not exist %s\n", bt.profileLog)
-                continue
-            }
-            ////
-            // TODO: confirm that moving file worked for 
-            // structured log content generated in Python
-            // Its possible for the testpool-daemon to maintain
-            // a handle to the moved file.
-            os.Remove(tmp_log)
-            if err := copyfile(bt.profileLog, tmp_log); err != nil {
-                logp.Err(err.Error())
-                continue
-            }
-            if err := os.Truncate(bt.profileLog, 0); err != nil {
-                logp.Err(err.Error())
-            }
-            ////
+		if _, err := os.Stat(bt.profileLog); os.IsNotExist(err) {
+			logp.Debug(service, "log does not exist %s\n", bt.profileLog)
+			continue
+		}
+		////
+		// TODO: confirm that moving file worked for
+		// structured log content generated in Python
+		// Its possible for the testpool-daemon to maintain
+		// a handle to the moved file.
+		os.Remove(tmp_log)
+		if err := copyfile(bt.profileLog, tmp_log); err != nil {
+			logp.Err(err.Error())
+			continue
+		}
+		if err := os.Truncate(bt.profileLog, 0); err != nil {
+			logp.Err(err.Error())
+		}
+		////
 
-	    profiles, err := profileRead(tmp_log)
-	    if err != nil {
-	        logp.Err(err.Error())
-            } else {
-	        for item := range profiles {
-                    event := common.MapStr{
-		        "@timestamp": timestamp,
-			"type":       b.Name,
-			"profile":    item.Profile,
-			"vm_max":     item.Vm_max,
-			"vm_count":   item.Vm_count,
-			"timestamp":  item.Timestamp,
-		    }
-		    bt.client.PublishEvent(event)
-	        }
-                os.Remove(tmp_log)
-	    }
+		profiles, err := profileRead(tmp_log)
+		if err != nil {
+			logp.Err(err.Error())
+		} else {
+			for item := range profiles {
+				event := common.MapStr{
+					"@timestamp": timestamp,
+					"type":       b.Name,
+					"profile":    item.Profile,
+					"vm_max":     item.Vm_max,
+					"vm_count":   item.Vm_count,
+					"timestamp":  item.Timestamp,
+				}
+				bt.client.PublishEvent(event)
+			}
+			os.Remove(tmp_log)
+		}
 	}
 }
 

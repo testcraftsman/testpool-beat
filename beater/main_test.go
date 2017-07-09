@@ -35,12 +35,12 @@ func TestProfile(t *testing.T) {
 	assert.Equal(t, err, nil, "read profile")
 	assert.NotEqual(t, generator, nil, "generator failed")
 
-        var counter = 0 
+	var counter = 0
 	for item := range generator {
-                assert.NotEqual(t, item, nil, item)
-                counter++
+		assert.NotEqual(t, item, nil, item)
+		counter++
 	}
-        assert.NotEqual(t, 0, 1)
+	assert.NotEqual(t, 0, 1)
 }
 
 func TestConfigRead(t *testing.T) {
