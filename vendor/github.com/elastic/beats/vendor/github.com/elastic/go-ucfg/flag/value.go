@@ -1,11 +1,28 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 package flag
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/elastic/go-ucfg"
+	"github.com/elastic/go-ucfg/internal/parse"
 )
 
 // NewFlagKeyValue implements the flag.Value interface for
@@ -32,6 +49,7 @@ func NewFlagKeyValue(cfg *ucfg.Config, autoBool bool, opts ...ucfg.Option) *Flag
 	return newFlagValue(cfg, opts, func(arg string) (*ucfg.Config, error, error) {
 		var key string
 		var val interface{}
+		var err error
 
 		args := strings.SplitN(arg, "=", 2)
 		if len(args) < 2 {
@@ -44,39 +62,18 @@ func NewFlagKeyValue(cfg *ucfg.Config, autoBool bool, opts ...ucfg.Option) *Flag
 			val = true
 		} else {
 			key = args[0]
-			val = parseCLIValue(args[1])
+			if args[1] == "" {
+				return nil, nil, nil
+			}
+
+			val, err = parse.Value(args[1])
+			if err != nil {
+				return nil, err, err
+			}
 		}
 
 		tmp := map[string]interface{}{key: val}
 		cfg, err := ucfg.NewFrom(tmp, opts...)
 		return cfg, err, err
 	})
-}
-
-func parseCLIValue(value string) interface{} {
-	if b, ok := parseBoolValue(value); ok {
-		return b
-	}
-
-	if n, err := strconv.ParseUint(value, 0, 64); err == nil {
-		return n
-	}
-	if n, err := strconv.ParseInt(value, 0, 64); err == nil {
-		return n
-	}
-	if n, err := strconv.ParseFloat(value, 64); err == nil {
-		return n
-	}
-
-	return value
-}
-
-func parseBoolValue(str string) (value bool, ok bool) {
-	switch str {
-	case "1", "t", "T", "true", "TRUE", "True", "on", "ON":
-		return true, true
-	case "0", "f", "F", "false", "FALSE", "False", "off", "OFF":
-		return false, true
-	}
-	return false, false
 }

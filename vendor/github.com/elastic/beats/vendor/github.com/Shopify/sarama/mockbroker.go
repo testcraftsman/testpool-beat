@@ -215,7 +215,7 @@ func (b *MockBroker) handleRequests(conn net.Conn, idx int, wg *sync.WaitGroup) 
 		}
 		Logger.Printf("*** mockbroker/%d/%d: served %v -> %v", b.brokerID, idx, req, res)
 
-		encodedRes, err := encode(res)
+		encodedRes, err := encode(res, nil)
 		if err != nil {
 			b.serverError(err)
 			break
@@ -288,6 +288,15 @@ func NewMockBroker(t TestReporter, brokerID int32) *MockBroker {
 // NewMockBrokerAddr behaves like newMockBroker but listens on the address you give
 // it rather than just some ephemeral port.
 func NewMockBrokerAddr(t TestReporter, brokerID int32, addr string) *MockBroker {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return NewMockBrokerListener(t, brokerID, listener)
+}
+
+// NewMockBrokerListener behaves like newMockBrokerAddr but accepts connections on the listener specified.
+func NewMockBrokerListener(t TestReporter, brokerID int32, listener net.Listener) *MockBroker {
 	var err error
 
 	broker := &MockBroker{
@@ -296,13 +305,10 @@ func NewMockBrokerAddr(t TestReporter, brokerID int32, addr string) *MockBroker 
 		t:            t,
 		brokerID:     brokerID,
 		expectations: make(chan encoder, 512),
+		listener:     listener,
 	}
 	broker.handler = broker.defaultRequestHandler
 
-	broker.listener, err = net.Listen("tcp", addr)
-	if err != nil {
-		t.Fatal(err)
-	}
 	Logger.Printf("*** mockbroker/%d listening on %s\n", brokerID, broker.listener.Addr().String())
 	_, portStr, err := net.SplitHostPort(broker.listener.Addr().String())
 	if err != nil {

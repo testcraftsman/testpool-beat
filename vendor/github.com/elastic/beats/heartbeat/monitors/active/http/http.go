@@ -1,3 +1,20 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 package http
 
 import (
@@ -20,7 +37,7 @@ func init() {
 var debugf = logp.MakeDebug("http")
 
 func create(
-	info monitors.Info,
+	name string,
 	cfg *common.Config,
 ) ([]monitors.Job, error) {
 	config := defaultConfig
@@ -36,16 +53,16 @@ func create(
 	var body []byte
 	var enc contentEncoder
 
-	if config.Check.SendBody != "" {
+	if config.Check.Request.SendBody != "" {
 		var err error
-		compression := config.Check.Compression
+		compression := config.Check.Request.Compression
 		enc, err = getContentEncoder(compression.Type, compression.Level)
 		if err != nil {
 			return nil, err
 		}
 
 		buf := bytes.NewBuffer(nil)
-		err = enc.Encode(buf, bytes.NewBufferString(config.Check.SendBody))
+		err = enc.Encode(buf, bytes.NewBufferString(config.Check.Request.SendBody))
 		if err != nil {
 			return nil, err
 		}
@@ -53,7 +70,7 @@ func create(
 		body = buf.Bytes()
 	}
 
-	validator := makeValidateResponse(&config.Check)
+	validator := makeValidateResponse(&config.Check.Response)
 
 	jobs := make([]monitors.Job, len(config.URLs))
 

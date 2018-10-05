@@ -1,3 +1,20 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 package ucfg
 
 import (
@@ -9,10 +26,19 @@ import (
 	"time"
 )
 
+// Validator interface provides additional validation support to Unpack. The
+// Validate method will be executed for any type passed directly or indirectly to
+// Unpack.
+//
+// If Validate fails with an error message, Unpack will add some
+// context - like setting being accessed and file setting was read from - to the
+// error message before returning the actual error.
 type Validator interface {
 	Validate() error
 }
 
+// ValidatorCallback is the type of optional validator tags to be registered via
+// RegisterValidator.
 type ValidatorCallback func(interface{}, string) error
 
 type validatorTag struct {
@@ -26,13 +52,21 @@ var (
 )
 
 func init() {
-	RegisterValidator("nonzero", validateNonZero)
-	RegisterValidator("positive", validatePositive)
-	RegisterValidator("min", validateMin)
-	RegisterValidator("max", validateMax)
-	RegisterValidator("required", validateRequired)
+	initRegisterValidator("nonzero", validateNonZero)
+	initRegisterValidator("positive", validatePositive)
+	initRegisterValidator("min", validateMin)
+	initRegisterValidator("max", validateMax)
+	initRegisterValidator("required", validateRequired)
 }
 
+func initRegisterValidator(name string, cb ValidatorCallback) {
+	if err := RegisterValidator(name, cb); err != nil {
+		panic("Duplicate validator: " + name)
+	}
+}
+
+// RegisterValidator adds a new validator option to the "validate" struct tag.
+// The callback will be executed when unpacking into a struct field.
 func RegisterValidator(name string, cb ValidatorCallback) error {
 	if _, exists := validators[name]; exists {
 		return ErrDuplicateValidator

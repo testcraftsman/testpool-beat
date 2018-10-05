@@ -23,9 +23,13 @@
       description: >
         Event round trip time in microseconds.
 
+    - name: metricset.namespace
+      type: keyword
+      description: >
+        Namespace of dynamic metricsets.
+
     - name: type
       required: true
       example: metricsets
       description: >
-        The document type. Always set to "metricsets".
-
+        The document type. Always set to "doc".

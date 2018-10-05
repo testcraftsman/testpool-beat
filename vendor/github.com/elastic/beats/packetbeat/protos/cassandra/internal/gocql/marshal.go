@@ -1,20 +1,34 @@
-// Copyright (c) 2012 The gocql Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 package cassandra
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math/big"
 	"reflect"
+	"strings"
 	"time"
 
-	"errors"
-	"github.com/elastic/beats/libbeat/logp"
 	"gopkg.in/inf.v0"
-	"strings"
+
+	"github.com/elastic/beats/libbeat/logp"
 )
 
 // TypeInfo describes a Cassandra specific data type.
@@ -530,19 +544,12 @@ func FrameOpFromString(s string) (FrameOp, error) {
 	return op, nil
 }
 
-func (f *FrameOp) Unpack(in interface{}) error {
-	s, ok := in.(string)
-	if !ok {
-		return errors.New("expected string")
-	}
-
+func (f *FrameOp) Unpack(s string) error {
 	op, err := FrameOpFromString(s)
-	if err != nil {
-		return err
+	if err == nil {
+		*f = op
 	}
-
-	*f = op
-	return nil
+	return err
 }
 
 const (
@@ -685,7 +692,6 @@ func (u UUID) String() string {
 	r[18] = '-'
 	r[23] = '-'
 	return string(r)
-
 }
 
 // UUIDFromBytes converts a raw byte slice to an UUID.
