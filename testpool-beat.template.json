@@ -71,6 +71,7 @@
           }
         },
         "profile": {
+          "ignore_above": 1024,
           "type": "keyword"
         },
         "tags": {

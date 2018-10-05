@@ -6,6 +6,8 @@ testpool-beat:
   # Defines how often an event is sent to the output
   period: 30s
 
+  template.overwrite: true
+
 #================================ General ======================================
 
 # The name of the shipper that publishes the network data. It can be used to group
